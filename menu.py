@@ -45,6 +45,19 @@ class Menu:
         self.red_skills = pygame.image.load('assets/menu/skill_menu/red_skillup.png')
         self.red_skills = pygame.transform.scale(self.red_skills,(32,32))
 
+        self.fang = pygame.image.load('assets/collects/fang.png')
+        self.fang = pygame.transform.scale(self.fang,(40,40))
+        self.eye = pygame.image.load('assets/collects/eye.png')
+        self.eye = pygame.transform.scale(self.eye,(40,40))
+        self.fur = pygame.image.load('assets/collects/fur.png')
+        self.fur = pygame.transform.scale(self.fur,(40,40))
+        self.scalp = pygame.image.load('assets/collects/scalp.png')
+        self.scalp = pygame.transform.scale(self.scalp,(40,40))
+        self.blood = pygame.image.load('assets/collects/blood.png')
+        self.blood = pygame.transform.scale(self.blood,(40,40))
+        self.ring = pygame.image.load('assets/collects/ring.png')
+        self.ring = pygame.transform.scale(self.ring,(40,40))
+
         
         self.font_big = pygame.font.Font('assets/UI/ARCADEPI.TTF',20)
         self.font = pygame.font.Font('assets/UI/ARCADEPI.TTF',13)
@@ -168,20 +181,24 @@ class Menu:
         
 
         for item in collects:
-            # self.fang = pygame.image.load()
-            # self.fang = pygame.transform.scale(self.image,(20,20))
+            
             if item == 'fang':
                 self.display_surface.blit(self.collected_icon,(292,(self.settings.screen_height/2)-80))
-                # self.display_surface.blit(self.fang,(292,(self.settings.screen_height/2)-80))
+                self.display_surface.blit(self.fang,(305,(self.settings.screen_height/2)-70))
             if item == 'eye':
                 self.display_surface.blit(self.collected_icon,(440,(self.settings.screen_height/2)-80))
+                self.display_surface.blit(self.eye,(451,(self.settings.screen_height/2)-69))
             if item == 'fur':
                 self.display_surface.blit(self.collected_icon,(588,(self.settings.screen_height/2)-80))
+                self.display_surface.blit(self.fur,(605,(self.settings.screen_height/2)-72))
             if item == 'scalp':
                 self.display_surface.blit(self.collected_icon,(292,(self.settings.screen_height/2)+4))
+                self.display_surface.blit(self.scalp,(303,(self.settings.screen_height/2)+14))
             if item == 'blood':
                 self.display_surface.blit(self.collected_icon,(440,(self.settings.screen_height/2)+4))
+                self.display_surface.blit(self.blood,(452,(self.settings.screen_height/2)+14))
             if item == 'ring':
                 self.display_surface.blit(self.collected_icon,(588,(self.settings.screen_height/2)+4))
+                self.display_surface.blit(self.ring,(600,(self.settings.screen_height/2)+14))
 
         
