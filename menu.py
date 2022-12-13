@@ -166,17 +166,22 @@ class Menu:
         esc_amount_rect = esc_amount_surface.get_rect(midleft = (702,(self.settings.screen_height/2)+85))
         self.display_surface.blit(esc_amount_surface,esc_amount_rect)
         
-        if collects >= 1:
-            self.display_surface.blit(self.collected_icon,(292,(self.settings.screen_height/2)-80))
-        if collects >=2:
-            self.display_surface.blit(self.collected_icon,(440,(self.settings.screen_height/2)-80))
-        if collects >=3:
-            self.display_surface.blit(self.collected_icon,(588,(self.settings.screen_height/2)-80))
-        if collects >=4:
-            self.display_surface.blit(self.collected_icon,(292,(self.settings.screen_height/2)+4))
-        if collects >=5:
-            self.display_surface.blit(self.collected_icon,(440,(self.settings.screen_height/2)+4))
-        if collects >=6:
-            self.display_surface.blit(self.collected_icon,(588,(self.settings.screen_height/2)+4))
+
+        for item in collects:
+            # self.fang = pygame.image.load()
+            # self.fang = pygame.transform.scale(self.image,(20,20))
+            if item == 'fang':
+                self.display_surface.blit(self.collected_icon,(292,(self.settings.screen_height/2)-80))
+                # self.display_surface.blit(self.fang,(292,(self.settings.screen_height/2)-80))
+            if item == 'eye':
+                self.display_surface.blit(self.collected_icon,(440,(self.settings.screen_height/2)-80))
+            if item == 'fur':
+                self.display_surface.blit(self.collected_icon,(588,(self.settings.screen_height/2)-80))
+            if item == 'scalp':
+                self.display_surface.blit(self.collected_icon,(292,(self.settings.screen_height/2)+4))
+            if item == 'blood':
+                self.display_surface.blit(self.collected_icon,(440,(self.settings.screen_height/2)+4))
+            if item == 'ring':
+                self.display_surface.blit(self.collected_icon,(588,(self.settings.screen_height/2)+4))
 
         

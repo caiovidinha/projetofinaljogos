@@ -15,7 +15,8 @@ from collectables import Collectable
 class Level:
     def __init__(self,level_data,surface):
         self.display_surface = surface
-        self.setup_level(level_data,0,20,100,100,100,0.5,100,0,0,0,0,10,8,0,0)
+       
+        self.setup_level(level_data,0,20,100,100,100,0.5,100,0,0,0,0,10,8,0,[])
         self.game_state = 'INGAME'
 
         self.world_shift = 0
@@ -158,7 +159,7 @@ class Level:
                     collect_sprite = Collectable((x,y),'fur')
                     self.collectables.add(collect_sprite)
                 if cell == '4':
-                    collect_sprite = Collectable((x,y),'claw')
+                    collect_sprite = Collectable((x,y),'scalp')
                     self.collectables.add(collect_sprite)
                 if cell == '5':
                     collect_sprite = Collectable((x,y),'blood')
@@ -386,21 +387,25 @@ class Level:
         if player.level == self.current_level + 1:
             self.load()
             if player.level == 1:
-                self.setup_level(level1_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collects)
+                self.setup_level(level1_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables)
                 
             elif player.level == 2:
-                self.setup_level(level1_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collects)
+                self.setup_level(level1_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables)
             self.current_level += 1
 
     def fall(self):
         player = self.player.sprite
         if player.rect.y > screen_height:
-            self.game_state = 'GAME_OVER'
-            if not player.fade:
-                self.fadeout()
-                self.fadein()
-                player.fade = True
-            self.hud.gameover()
+            self.load()
+            if player.level == 0:
+                self.setup_level(level0_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables)
+            
+            elif player.level == 1:
+                self.setup_level(level1_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables)
+                
+            elif player.level == 2:
+                self.setup_level(level1_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables)
+            
 
     def fadeout(self):
         fadeout = pygame.Surface((screen_width, screen_height))
@@ -537,7 +542,7 @@ class Level:
         if self.game_state == 'SKILL_MENU':
             self.menu.show_status(player_status.max_health,player_status.max_stamina,player_status.bgems,player_status.rgems,player_status.blue_level,player_status.red_level,player_status.attack_damage,player_status.speed)
         if self.game_state == 'COLLECT_MENU':
-            self.menu.show_collects(player_status.collects)
+            self.menu.show_collects(player_status.collectables)
             
     def run(self):
         player_status = self.player.sprite
@@ -562,6 +567,7 @@ class Level:
             self.monster_col.update(self.world_shift)
             self.fly_col.update(self.world_shift)
 
+            self.collectables.update(self.world_shift)
             self.monster.update(self.world_shift)
             self.fireball.update(self.world_shift)
             self.enemy_horizontal_collisions()
@@ -587,6 +593,7 @@ class Level:
         self.portal.draw(self.display_surface)
         self.bgems.draw(self.display_surface)
         self.player.draw(self.display_surface)
+        self.collectables.draw(self.display_surface)
         if player_status.level_up:
             self.hud.level_up(player_status.last_level)
         self.show_menu()
