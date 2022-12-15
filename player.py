@@ -17,6 +17,7 @@ class Player(pygame.sprite.Sprite):
         self.collectables = collects
 
         self.fade = False
+        self.main_menu = True
         
         #Atributos do jogador
         self.max_health = max_health
@@ -265,6 +266,8 @@ class Player(pygame.sprite.Sprite):
                     self.fire_attack = True
                     self.attack_time = pygame.time.get_ticks()
                     self.current_stamina -= 60
+            if keys[pygame.K_RETURN]:
+                self.main_menu = False
                 
     def cooldowns(self):
         #Função que aplica os cooldowns com um "relógio feito com a função get_ticks()"

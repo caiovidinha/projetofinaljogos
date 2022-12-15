@@ -58,6 +58,12 @@ class Menu:
         self.ring = pygame.image.load('assets/collects/ring.png')
         self.ring = pygame.transform.scale(self.ring,(40,40))
 
+
+
+        self.main_menu_bg = pygame.image.load('assets/menu/main_menu/background.jpg')
+        self.main_menu_text = pygame.image.load('assets/menu/main_menu/text.png')
+        self.text_opac = 255
+        self.decay = True
         
         self.font_big = pygame.font.Font('assets/UI/ARCADEPI.TTF',20)
         self.font = pygame.font.Font('assets/UI/ARCADEPI.TTF',13)
@@ -202,3 +208,17 @@ class Menu:
                 self.display_surface.blit(self.ring,(600,(self.settings.screen_height/2)+14))
 
         
+    def main_menu(self):
+        self.display_surface.blit(self.main_menu_bg,(0,0))
+        self.display_surface.blit(self.main_menu_text,(0,0))
+        self.main_menu_text.set_alpha(self.text_opac)
+        if self.decay:
+            self.text_opac -= 10
+            if self.text_opac <= 0:
+                self.decay = False
+            
+        else:
+            self.text_opac += 10
+            
+            if self.text_opac >= 255:
+                self.decay = True
