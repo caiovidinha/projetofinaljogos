@@ -3,7 +3,7 @@ from support_player import importar_pasta
 from math import sin
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self,pos,surface,create_jump_particles,gems,blue_gems,max_health,current_health,max_stamina,regen_rate,current_stamina,blue_level,red_level,bgems,rgems,damage,speed,current_level,collects):
+    def __init__(self,pos,surface,create_jump_particles,gems,blue_gems,max_health,current_health,max_stamina,regen_rate,current_stamina,blue_level,red_level,bgems,rgems,damage,speed,current_level,collects,main_menu):
         super().__init__()
         self.import_character_assets()
         self.import_run_dust()
@@ -17,7 +17,7 @@ class Player(pygame.sprite.Sprite):
         self.collectables = collects
 
         self.fade = False
-        self.main_menu = True
+        self.main_menu = main_menu
         
         #Atributos do jogador
         self.max_health = max_health
@@ -64,6 +64,11 @@ class Player(pygame.sprite.Sprite):
 
         #Tempo da "animação" de game over    
         self.game_over = 100
+
+        #Sons
+        self.dodge_sound = pygame.mixer.Sound('assets/sounds/88_Teleport_02.wav')
+        self.attack_sound = pygame.mixer.Sound('assets/sounds/56_Attack_03.wav')
+        self.step_sound = pygame.mixer.Sound('assets/sounds/08_Step_rock_02.wav')
 
         #Cooldowns
         self.dodge = False
@@ -210,6 +215,7 @@ class Player(pygame.sprite.Sprite):
     def player_dodge(self):
         #Função que aplica o "poder" de dodge do player, define gasto mínimo e movimentação
         if not self.dodge and self.current_stamina > 70:
+            self.dodge_sound.play()
             self.dodge = True
             self.dodge_time = pygame.time.get_ticks()
             if self.facing_right:
@@ -258,6 +264,7 @@ class Player(pygame.sprite.Sprite):
             
             if keys[pygame.K_z] and not self.attacking:
                 if self.current_stamina > 30:
+                    self.attack_sound.play()
                     self.attacking = True
                     self.attack_time = pygame.time.get_ticks()
                     self.current_stamina -= 25

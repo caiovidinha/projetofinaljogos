@@ -9,7 +9,7 @@ screen = pygame.display.set_mode((screen_width,screen_height))
 pygame.display.set_caption('Fire Soul')
 bg = pygame.image.load("assets/bg.png")
 clock = pygame.time.Clock()
-level = Level(final_level_map,screen)
+level = Level(level0_map,screen)
 
 while True:
     for event in pygame.event.get():

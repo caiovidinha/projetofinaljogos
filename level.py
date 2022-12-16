@@ -18,12 +18,26 @@ class Level:
     def __init__(self,level_data,surface):
         self.display_surface = surface
        
-        self.setup_level(level_data,0,20,100,100,100,0.5,100,0,0,0,0,10,8,0,[])
+        self.setup_level(level_data,0,20,100,100,100,0.5,100,0,0,0,0,10,8,0,[],True)
         self.game_state = 'INGAME'
+        self.dialogue_text = 0
 
         self.world_shift = 0
         self.current_x = 0
         self.current_level = 0
+
+        #audio
+        self.gem_sound = pygame.mixer.Sound('assets/sounds/013_Confirm_03.wav')
+        self.jump_sound = pygame.mixer.Sound('assets/sounds/30_Jump_03.wav')
+        self.hit_sound = pygame.mixer.Sound('assets/sounds/61_Hit_03.wav')
+        self.menu_sound = pygame.mixer.Sound('assets/sounds/001_Hover_01.wav')
+        self.fireball_sound = pygame.mixer.Sound('assets/sounds/04_Fire_explosion_04_medium.wav')
+        self.boss_attack_sound = pygame.mixer.Sound('assets/sounds/55_Encounter_02.wav')
+        self.land_sound = pygame.mixer.Sound('assets/sounds/45_Landing_01.wav')
+        self.menu_music = pygame.mixer.Sound('assets/sounds/music/xDeviruchi - Decisive Battle.wav')
+        self.game_music = pygame.mixer.Sound('assets/sounds/music/xDeviruchi - The Icy Cave .wav')
+        self.game_music.play(loops=-1)
+
 
         self.fireball = pygame.sprite.Group()
 
@@ -45,6 +59,7 @@ class Level:
                 pos += pygame.math.Vector2(2,-10)
             jump_particle = ParticleEffect(pos, 'jump')
             self.dust_sprite.add(jump_particle)
+            self.jump_sound.play()
 
     def create_landing_dust(self):
         if not self.player_on_ground and self.player.sprite.on_ground and not self.dust_sprite.sprites():
@@ -54,8 +69,9 @@ class Level:
                 offset = pygame.math.Vector2(-10,15)
             fall_dust_particle = ParticleEffect(self.player.sprite.rect.midbottom-offset,'land')
             self.dust_sprite.add(fall_dust_particle)
+            self.jump_sound.play()
 
-    def setup_level(self,layout,gems,blue_gems,max_health,current_health,max_stamina,regen_rate,current_stamina,blue_level,red_level,bgems,rgems,damage,speed,current_level,collects):
+    def setup_level(self,layout,gems,blue_gems,max_health,current_health,max_stamina,regen_rate,current_stamina,blue_level,red_level,bgems,rgems,damage,speed,current_level,collects,main_menu):
         self.tiles = pygame.sprite.Group()
         self.player = pygame.sprite.GroupSingle()
         self.boss = pygame.sprite.GroupSingle()
@@ -129,7 +145,7 @@ class Level:
                 if cell == 'U':
                     self.last_x = x
                     self.last_y = y
-                    player_sprite = Player((x,y),self.display_surface,self.create_jump_particles,gems,blue_gems,max_health,current_health,max_stamina,regen_rate,current_stamina,blue_level,red_level,bgems,rgems,damage,speed,current_level,collects)
+                    player_sprite = Player((x,y),self.display_surface,self.create_jump_particles,gems,blue_gems,max_health,current_health,max_stamina,regen_rate,current_stamina,blue_level,red_level,bgems,rgems,damage,speed,current_level,collects,False)
                     self.player.add(player_sprite)
                 if cell == 'I':
                     portal_sprite = Portal((x,y-95))
@@ -216,7 +232,28 @@ class Level:
         player = self.player.sprite
         collects = pygame.sprite.spritecollide(player,self.collectables,True)
         if collects:
+            self.gem_sound.play()
             for col in collects:
+                if col.name == 'fang':
+                    self.dialogue_text = 1
+                if col.name == 'eye':
+                    self.dialogue_text = 2
+                if col.name == 'fur':
+                    self.dialogue_text = 3
+                if col.name == 'scalp':
+                    self.dialogue_text = 4
+                if col.name == 'blood':
+                    self.dialogue_text = 5
+                if col.name == 'ring':
+                    self.dialogue_text = 6
+                    player.speed += 1
+                    player.cur_speed += 2
+                    player.max_stamina += 10
+                    player.current_stamina += 10
+                    player.attack_damage += 5
+                    player.max_health += 10
+                    player.current_health += 10
+                self.game_state = 'DIALOGUE'
                 player.collectables.append(col.name)
  
     def horizontal_movement_collision(self):
@@ -352,6 +389,7 @@ class Level:
             else:
                 fireball = Fireball((player.rect.x,player.rect.y + (player.image.get_height()-20)),False,-5,300)
             self.fireball.add(fireball)
+            self.fireball_sound.play()
     
     def fireball_cd(self):
         for fireball in self.fireball.sprites():
@@ -375,7 +413,7 @@ class Level:
                         enemy.status = 'slide'
                     
     def restart(self):
-        self.setup_level(level0_map,0,20,100,100,100,0.5,100,0,0,0,0,10,8,0,0)
+        self.setup_level(level0_map,0,20,100,100,100,0.5,100,0,0,0,0,10,8,0,[],False)
         self.current_level = 0
 
     def check_game_over(self):
@@ -397,11 +435,15 @@ class Level:
         if player.level == self.current_level + 1:
             self.load()
             if player.level == 1:
-                self.setup_level(level1_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables) 
+                self.setup_level(level1_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables,False) 
             elif player.level == 2:
-                self.setup_level(level2_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables)
+                self.setup_level(level2_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables,False)
             elif player.level == 3:
-                self.setup_level(level3_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables)
+                self.setup_level(level3_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables,False)
+            elif player.level == 4:
+                self.setup_level(level4_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables,False)
+            elif player.level == 5:
+                self.setup_level(final_level_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables,False)
             
             self.current_level += 1
             
@@ -505,6 +547,7 @@ class Level:
         player = self.player.sprite
         collided_gems = pygame.sprite.spritecollide(player,self.bgems,True)
         if collided_gems:
+            self.gem_sound.play()
             for gem in collided_gems:
                 self.last_x = gem.rect.x
                 self.last_y = gem.rect.y
@@ -524,28 +567,36 @@ class Level:
     def player_damage(self,amount):
         player = self.player.sprite
         player.current_health -= amount
+        self.hit_sound.play()
 
     def get_inputs(self):
         keys = pygame.key.get_pressed()
-        
+        if self.game_state == 'ENDGAME':
+            if keys[pygame.K_ESCAPE]:
+                exit(1)
         if self.game_state == 'INGAME':
             if keys[pygame.K_q]:
+                self.menu_sound.play()
                 self.game_state = 'SKILL_MENU'
         elif self.game_state == 'SKILL_MENU':
             if keys[pygame.K_ESCAPE]:
+                self.menu_sound.play()
                 self.game_state = 'INGAME'
         if self.game_state == 'INGAME':
             if keys[pygame.K_e]:
+                self.menu_sound.play()
                 self.game_state = 'COLLECT_MENU'
             if keys[pygame.K_d]:
                 self.game_state = 'DIALOGUE'
                 self.cutscene.in_dialogue = True
         elif self.game_state == 'COLLECT_MENU':
             if keys[pygame.K_ESCAPE]:
+                self.menu_sound.play()
                 self.game_state = 'INGAME'
                 
         if self.game_state == 'DIALOGUE':
             if keys[pygame.K_ESCAPE]:
+                self.menu_sound.play()
                 self.game_state = 'INGAME'
                 self.cutscene.in_dialogue = False
         if self.game_state == 'GAME_OVER':
@@ -559,7 +610,7 @@ class Level:
             self.menu.show_status(player_status.max_health,player_status.max_stamina,player_status.bgems,player_status.rgems,player_status.blue_level,player_status.red_level,player_status.attack_damage,player_status.speed)
         if self.game_state == 'COLLECT_MENU':
             self.menu.show_collects(player_status.collectables)
-    
+          
     def boss_AI(self):
         boss = self.boss.sprite
         player = self.player.sprite   
@@ -579,12 +630,28 @@ class Level:
         boss = self.boss.sprite
         player = self.player.sprite 
 
-        if player.attacking or player.fire_attack or player.dodge:
+        if player.attacking:
             collide = pygame.sprite.spritecollide(player,self.boss,False)
             if collide and not boss.invincible:
                 boss.current_hp -= player.attack_damage
                 boss.invincible = True
                 boss.damage_time = pygame.time.get_ticks()
+
+
+        if player.fire_attack or player.dodge:
+            if boss.fire_resistant:
+                collide = pygame.sprite.spritecollide(player,self.boss,False)
+                if collide and not boss.invincible:
+                    boss.current_hp -= player.attack_damage
+                    boss.invincible = True
+                    boss.damage_time = pygame.time.get_ticks()
+
+        if boss.attacking:
+            collide = pygame.sprite.spritecollide(boss,self.player,False)
+            if collide and not player.invincible:
+                player.current_health -= boss.damage
+                player.invincible = True
+                player.hurt_time = pygame.time.get_ticks()
 
     def run(self):
         player_status = self.player.sprite
@@ -594,7 +661,7 @@ class Level:
         self.next_level()
         self.tiles.update(self.world_shift)
         self.tiles.draw(self.display_surface)
-        if self.game_state != 'SKILL_MENU' and self.game_state != 'COLLECT_MENU' and self.game_state != 'DIALOGUE':
+        if self.game_state != 'SKILL_MENU' and self.game_state != 'COLLECT_MENU' and self.game_state != 'DIALOGUE' and self.game_state != 'ENDGAME':
             player_status.gravity = 0.8
             self.scroll_x()
             self.portal.update(self.world_shift)
@@ -621,9 +688,10 @@ class Level:
 
             self.check_portal_collision()
             self.player.update()
-            self.boss_AI()
-            self.boss_damage()
-            self.boss.update(self.world_shift)
+            if self.current_level == 5:
+                self.boss_AI()
+                self.boss_damage()
+                self.boss.update(self.world_shift)
             
             
             self.horizontal_movement_collision()
@@ -660,18 +728,26 @@ class Level:
             self.hud.show_icon()
             self.hud.show_icons()
             self.hud.show_gems(player_status.blue_gems,player_status.gems)
-            if self.hud.last_level:
+            if self.current_level == 5:
                 self.hud.boss_health_bar(boss.current_hp,boss.hp)
-            # if self.cutscene.text_slide <= 70:
-            #     self.cutscene.prologue()
+            if self.cutscene.text_slide <= 70:
+                self.cutscene.prologue()
 
-            # elif self.cutscene.text_slide > 70 and player_status.main_menu:
-            #     self.menu.main_menu()
+            elif self.cutscene.text_slide > 70 and player_status.main_menu:
+                self.menu.main_menu()
                 
-
-            if self.game_state == 'DIALOGUE' and self.cutscene.in_dialogue:
-                self.cutscene.dialogue("Ola, asdadasda e dd dsadasdaaddd d se dss d asasjhasjh ajshsaj h jh sjahsj ahs jahjs ahs jahs jahj sahj sashj  hjsahs a jas")
-            #print(self.player.sprite.collectables)
+            
+                
+            if self.current_level == 5:
+                if boss.current_hp <= 0: 
+                    self.dialogue_text = 7
+                    self.game_state = 'ENDGAME'
+            if self.game_state == 'ENDGAME':
+                self.game_music.stop()
+                self.menu_music.play(loops=-1)
+            if self.game_state == 'DIALOGUE' or self.game_state == 'ENDGAME':
+                self.cutscene.dialogue(self.dialogue_text)
+                
 
         
         

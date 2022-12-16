@@ -147,3 +147,6 @@ class UI:
         boss_bar_rect = pygame.Rect(self.boss_bar_topleft,(current_bar_width,15))
         pygame.draw.rect(self.display_surface,'#8F0B0B',boss_bar_rect)
         self.display_surface.blit(self.boss_bar_frame,(21,475))
+        boss_name = self.font_big.render('A BESTA',False,'#DDDDDD')
+        boss_name_rect = boss_name.get_rect(center = ((screen_width/2),470))
+        self.display_surface.blit(boss_name,boss_name_rect)
