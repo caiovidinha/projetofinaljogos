@@ -374,10 +374,10 @@ class Level:
                 for enemy in collided_enemies:
                     if not player.invincible and not player.attacking and not player.fire_attack:
                         if enemy.type == 'voador':
-                            self.player_damage(10)
+                            self.player_damage(5)
                             player.invincible = True
                         elif enemy.type == 'terrestre' and enemy.status != 'hidden':
-                            self.player_damage(15)
+                            self.player_damage(5)
                             player.invincible = True
                         player.hurt_time = pygame.time.get_ticks()
     
@@ -524,12 +524,13 @@ class Level:
                 player.cur_speed += 1
                 player.max_stamina += 10
                 player.current_stamina += 10
+                player.current_health = player.max_health
             elif player.bgems < player.rgems:
                 player.last_level = 'red'
                 player.red_level += 1
                 player.attack_damage += 5
                 player.max_health += 10
-                player.current_health += 10
+                player.current_health = player.max_health
             else:
                 player.last_level = 'both'
                 player.red_level += 1
@@ -537,7 +538,7 @@ class Level:
                 player.max_stamina += 20
                 player.current_stamina += 20
                 player.max_health += 20
-                player.current_health += 20
+                player.current_health = player.max_health
             player.gems = 0
             player.bgems = 0
             player.rgems = 0
