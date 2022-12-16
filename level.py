@@ -176,7 +176,7 @@ class Level:
                     self.collectables.add(collect_sprite)
                 
                 if cell == '+':
-                    boss_sprite = Boss((x,y))
+                    boss_sprite = Boss((x,y-60),self.player.sprite.collectables)
                     self.boss.add(boss_sprite)
 
     def get_player_on_ground(self):
@@ -397,12 +397,14 @@ class Level:
         if player.level == self.current_level + 1:
             self.load()
             if player.level == 1:
-                self.setup_level(level1_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables)
-                
+                self.setup_level(level1_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables) 
             elif player.level == 2:
-                self.setup_level(level1_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables)
+                self.setup_level(level2_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables)
+            elif player.level == 3:
+                self.setup_level(level3_map,player.gems,player.blue_gems,player.max_health,player.current_health,player.max_stamina,player.stamina_regen_rate,player.current_stamina,player.blue_level,player.red_level,player.bgems,player.rgems,player.attack_damage,player.speed,player.level,player.collectables)
+            
             self.current_level += 1
-
+            
     def fall(self):
         player = self.player.sprite
         if player.rect.y > screen_height:
@@ -557,17 +559,36 @@ class Level:
             self.menu.show_status(player_status.max_health,player_status.max_stamina,player_status.bgems,player_status.rgems,player_status.blue_level,player_status.red_level,player_status.attack_damage,player_status.speed)
         if self.game_state == 'COLLECT_MENU':
             self.menu.show_collects(player_status.collectables)
-            
+    
     def boss_AI(self):
         boss = self.boss.sprite
         player = self.player.sprite   
-        if (abs(boss.rect.x - player.rect.x) >= 100) and (abs(boss.rect.y - player.rect.y) >= 100):
-            if pygame.time.get_ticks() - boss.attack_timer >= 2000:
+        if player.rect.x < boss.rect.x and boss.rect.x-player.rect.x > 100:
+            boss.rect.x -= boss.speed
+            boss.facing_right = False
+        elif player.rect.x > boss.rect.x and player.rect.x-boss.rect.x > 200:
+            boss.rect.x += boss.speed
+            boss.facing_right = True
+        else:
+            if not boss.attacking and not boss.attackcooldown:
                 boss.attack()
-                boss.attack_timer = pygame.time.get_ticks()
+                boss.attackcooldown = True
+                boss.attack_time = pygame.time.get_ticks()
+
+    def boss_damage(self):
+        boss = self.boss.sprite
+        player = self.player.sprite 
+
+        if player.attacking or player.fire_attack or player.dodge:
+            collide = pygame.sprite.spritecollide(player,self.boss,False)
+            if collide and not boss.invincible:
+                boss.current_hp -= player.attack_damage
+                boss.invincible = True
+                boss.damage_time = pygame.time.get_ticks()
 
     def run(self):
         player_status = self.player.sprite
+        boss = self.boss.sprite
 
         self.level_up()
         self.next_level()
@@ -596,9 +617,14 @@ class Level:
             self.enemy_vertical_collisions()
             self.check_enemy_death()
             self.player_fireball()
+            
 
             self.check_portal_collision()
             self.player.update()
+            self.boss_AI()
+            self.boss_damage()
+            self.boss.update(self.world_shift)
+            
             
             self.horizontal_movement_collision()
             self.get_player_on_ground()
@@ -606,6 +632,7 @@ class Level:
             self.create_landing_dust()
         else:
             player_status.gravity = 0
+            
 
         self.get_inputs()
         self.monster.draw(self.display_surface)
@@ -615,6 +642,7 @@ class Level:
         self.portal.draw(self.display_surface)
         self.bgems.draw(self.display_surface)
         self.player.draw(self.display_surface)
+        self.boss.draw(self.display_surface)
         self.collectables.draw(self.display_surface)
         if player_status.level_up:
             self.hud.level_up(player_status.last_level)
@@ -632,16 +660,18 @@ class Level:
             self.hud.show_icon()
             self.hud.show_icons()
             self.hud.show_gems(player_status.blue_gems,player_status.gems)
-            if self.cutscene.text_slide <= 70:
-                #self.cutscene.prologue()
-                pass
-            elif self.cutscene.text_slide > 70 and player_status.main_menu:
-                #self.menu.main_menu()
-                pass
+            if self.hud.last_level:
+                self.hud.boss_health_bar(boss.current_hp,boss.hp)
+            # if self.cutscene.text_slide <= 70:
+            #     self.cutscene.prologue()
+
+            # elif self.cutscene.text_slide > 70 and player_status.main_menu:
+            #     self.menu.main_menu()
+                
 
             if self.game_state == 'DIALOGUE' and self.cutscene.in_dialogue:
                 self.cutscene.dialogue("Ola, asdadasda e dd dsadasdaaddd d se dss d asasjhasjh ajshsaj h jh sjahsj ahs jahjs ahs jahs jahj sahj sashj  hjsahs a jas")
-            print(self.game_state)
+            #print(self.player.sprite.collectables)
 
         
         

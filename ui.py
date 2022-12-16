@@ -9,10 +9,17 @@ class UI:
         self.health_bar = pygame.image.load('assets/UI/health_bar.png').convert_alpha()
         self.health_bar = pygame.transform.scale(self.health_bar,(116,12))
         self.health_bar_topleft = (76,20)
+        self.boss_bar_topleft = (30,480)
         self.bar_max_width = 116
         self.bar_height = 12
 
+        self.last_level = True
+
         self.game_over = pygame.image.load('assets/gameoverbg.jpg').convert_alpha()
+        self.boss_bar = pygame.image.load('assets/UI/bosslifebar.png').convert_alpha()
+        self.boss_bar_frame = pygame.image.load('assets/UI/boss_bar_frame.png').convert_alpha()
+        self.boss_bar = pygame.transform.scale(self.boss_bar,(958,25))
+        self.boss_bar_frame = pygame.transform.scale(self.boss_bar_frame,(958,25))
 
         self.stamina_bar = pygame.image.load('assets/UI/stamina_bar.png').convert_alpha()
         self.stamina_bar = pygame.transform.scale(self.stamina_bar,(116,12))
@@ -132,3 +139,11 @@ class UI:
         pygame.draw.rect(self.display_surface,'#174171',gems_blue_rect)
         self.display_surface.blit(self.gems_bar,(130,46))
         self.display_surface.blit(gem_amount_surface,gem_amount_rect)
+
+    def boss_health_bar(self,current_health,full):
+        self.display_surface.blit(self.boss_bar,(21,475))
+        current_health_ratio = current_health/full
+        current_bar_width = 940 * current_health_ratio
+        boss_bar_rect = pygame.Rect(self.boss_bar_topleft,(current_bar_width,15))
+        pygame.draw.rect(self.display_surface,'#8F0B0B',boss_bar_rect)
+        self.display_surface.blit(self.boss_bar_frame,(21,475))

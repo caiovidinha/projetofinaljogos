@@ -12,7 +12,7 @@ class Player(pygame.sprite.Sprite):
         self.frame_index = 0
         self.vel_animacao = 0.15
         self.image = self.animations['idle'][self.frame_index]
-
+        
         #Armazenar quais itens foram coletados pelo jogador
         self.collectables = collects
 
