@@ -25,6 +25,7 @@ class Level:
         self.world_shift = 0
         self.current_x = 0
         self.current_level = 0
+        self.main_menu_on = True
 
         #audio
         self.gem_sound = pygame.mixer.Sound('assets/sounds/013_Confirm_03.wav')
@@ -81,6 +82,7 @@ class Level:
         self.portal = pygame.sprite.GroupSingle()
         self.bgems = pygame.sprite.Group()
         self.collectables = pygame.sprite.Group()
+        self.main_menu = main_menu
 
         for row_index,row in enumerate(layout):
             for col_index,cell in enumerate(row):
@@ -377,7 +379,7 @@ class Level:
                             self.player_damage(5)
                             player.invincible = True
                         elif enemy.type == 'terrestre' and enemy.status != 'hidden':
-                            self.player_damage(5)
+                            self.player_damage(7)
                             player.invincible = True
                         player.hurt_time = pygame.time.get_ticks()
     
@@ -524,13 +526,12 @@ class Level:
                 player.cur_speed += 1
                 player.max_stamina += 10
                 player.current_stamina += 10
-                player.current_health = player.max_health
             elif player.bgems < player.rgems:
                 player.last_level = 'red'
                 player.red_level += 1
                 player.attack_damage += 5
                 player.max_health += 10
-                player.current_health = player.max_health
+                player.current_health += 10
             else:
                 player.last_level = 'both'
                 player.red_level += 1
@@ -538,7 +539,7 @@ class Level:
                 player.max_stamina += 20
                 player.current_stamina += 20
                 player.max_health += 20
-                player.current_health = player.max_health
+                player.current_health += 20
             player.gems = 0
             player.bgems = 0
             player.rgems = 0
@@ -604,6 +605,9 @@ class Level:
             if keys[pygame.K_RETURN]:
                 self.restart()
                 self.game_state = 'INGAME'
+        if self.main_menu_on:
+            if keys[pygame.K_RETURN]:
+                self.main_menu_on = False
             
     def show_menu(self):
         player_status = self.player.sprite
@@ -734,7 +738,7 @@ class Level:
             if self.cutscene.text_slide <= 70:
                 self.cutscene.prologue()
 
-            elif self.cutscene.text_slide > 70 and player_status.main_menu:
+            elif self.cutscene.text_slide > 70 and self.main_menu_on:
                 self.menu.main_menu()
                 
             

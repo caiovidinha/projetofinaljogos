@@ -17,7 +17,7 @@ class Player(pygame.sprite.Sprite):
         self.collectables = collects
 
         self.fade = False
-        self.main_menu = main_menu
+        
         
         #Atributos do jogador
         self.max_health = max_health
@@ -273,6 +273,7 @@ class Player(pygame.sprite.Sprite):
                     self.fire_attack = True
                     self.attack_time = pygame.time.get_ticks()
                     self.current_stamina -= 60
+            
             if keys[pygame.K_RETURN]:
                 self.main_menu = False
                 
